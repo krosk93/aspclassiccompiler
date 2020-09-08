@@ -1,11 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using Dlrsoft.VBScript.Parser;
+using System;
+#if !NETSTANDARD
 using Microsoft.VisualBasic;
-#if USE35
+using System.Drawing;
 #else
-using System.Linq;
+using System.Globalization;
 #endif
+using System.Linq;
+using System.Text;
 
 namespace Dlrsoft.VBScript.Runtime
 {
@@ -136,14 +138,14 @@ namespace Dlrsoft.VBScript.Runtime
 
             throw new ArgumentException("Expect numeric argument", "number");
         }
-#if !SILVERLIGHT
+
         public static object CreateObject(string progId)
         {
-            return Createobject(progId, null);
+            return CreateObject(progId, null);
         }
 
 
-        public static object Createobject(string progId, string location)
+        public static object CreateObject(string progId, string location)
         {
             Type type = Type.GetTypeFromProgID(progId);
             if (type == null)
@@ -157,11 +159,15 @@ namespace Dlrsoft.VBScript.Runtime
             }
             else
             {
+#if !NETSTANDARD
                 return Activator.GetObject(type, location);
+#else
+                throw new NotImplementedException();
+#endif
             }
         }
-#endif
-        public static float CSng(object expression)
+
+            public static float CSng(object expression)
         {
             return Convert.ToSingle(expression);
         }
@@ -172,21 +178,21 @@ namespace Dlrsoft.VBScript.Runtime
             {
                 return string.Empty;
             }
-            else if (expression is string)
+            else if (expression is string @string)
             {
-                return (string)expression;
+                return @string;
             }
-            else if (expression is DateTime)
+            else if (expression is DateTime time)
             {
-                return ((DateTime)expression).ToShortDateString();
+                return time.ToShortDateString();
             }
             else if (expression is DBNull)
             {
                 throw new ArgumentException("Cannot convert DBNull to string");
             }
-            else if (expression is Exception)
+            else if (expression is Exception exception)
             {
-                return ((Exception)expression).Message;
+                return exception.Message;
             }
             else
             {
@@ -215,9 +221,9 @@ namespace Dlrsoft.VBScript.Runtime
             {
                 theNumber = Convert.ToInt32(number);
             }
-            else if (number is string)
+            else if (number is string @string)
             {
-                theNumber  = int.Parse((string)number);
+                theNumber  = int.Parse(@string);
             }
             else
             {
@@ -233,13 +239,13 @@ namespace Dlrsoft.VBScript.Runtime
             {
                 throw new ArgumentException("date cannot be dbNull.");
             }
-            else if (date is DateTime)
+            else if (date is DateTime time)
             {
-                theDate = (DateTime)date;
+                theDate = time;
             }
-            else if (date is string)
+            else if (date is string @string)
             {
-                theDate = DateTime.Parse((string)date);
+                theDate = DateTime.Parse(@string);
             }
             else
             {
@@ -365,13 +371,13 @@ namespace Dlrsoft.VBScript.Runtime
             {
                 throw new ArgumentException("date cannot be dbNull.");
             }
-            else if (date is DateTime)
+            else if (date is DateTime time)
             {
-                theDate = (DateTime)date;
+                theDate = time;
             }
-            else if (date is string)
+            else if (date is string @string)
             {
-                theDate = DateTime.Parse((string)date);
+                theDate = DateTime.Parse(@string);
             }
             else
             {
@@ -412,9 +418,9 @@ namespace Dlrsoft.VBScript.Runtime
 
         public static DateTime DateValue(object date)
         {
-            if (date is string)
+            if (date is string @string)
             {
-                date = DateTime.Parse((string)date);
+                date = DateTime.Parse(@string);
             }
 
             if (date is DateTime)
@@ -444,7 +450,7 @@ namespace Dlrsoft.VBScript.Runtime
 
         public static string Escape(object charString)
         {
-            return System.Uri.EscapeDataString((string)charString); ;
+            return System.Uri.EscapeDataString((string)charString);
         }
 
         public static object Eval(string expression)
@@ -486,9 +492,14 @@ namespace Dlrsoft.VBScript.Runtime
 
         public static object Fix(object number)
         {
+#if !NETSTANDARD
             return Conversion.Fix(number);
+#else
+            return Math.Truncate((decimal)number);
+#endif
         }
 
+#if !NETSTANDARD
         public static object FormatCurrency(object expression)
         {
             return FormatCurrency(expression, -1);
@@ -513,11 +524,18 @@ namespace Dlrsoft.VBScript.Runtime
         {
             return Strings.FormatCurrency(expression, (int)numDigitsAfterDecimal, (TriState)includeLeadingDigit, (TriState)useParentsForNegativeNumbers, (TriState)groupDigits);
         }
+#endif
 
         public static object FormatDateTime(object date, object namedFormat)
         {
+#if !NETSTANDARD
             return Strings.FormatDateTime((DateTime)date, (DateFormat)namedFormat);
+#else
+            // TODO: Implement format
+            return Convert.ToDateTime(date).ToString();
+#endif
         }
+#if !NETSTANDARD
 
         public static object FormatNumber(object expression)
         {
@@ -568,16 +586,12 @@ namespace Dlrsoft.VBScript.Runtime
         {
             return Strings.FormatPercent(expression, (int)numberDigistAfterDecimal, (TriState)includeLeadingDigits, (TriState)userParentsForNegativeNumbers, (TriState)groupDigits);
         }
+#endif
 
         public static object GetLocale()
-        {
-#if !SILVERLIGHT
-            return System.Globalization.CultureInfo.CurrentCulture.LCID;
-#else
-            return System.Globalization.CultureInfo.CurrentCulture.Name;
-#endif
-        }
-#if !SILVERLIGHT
+            => System.Globalization.CultureInfo.CurrentCulture.LCID;
+
+#if !NETSTANDARD
         public static object GetObject(object pathname)
         {
             return GetObject(pathname, null);
@@ -588,6 +602,7 @@ namespace Dlrsoft.VBScript.Runtime
             return Interaction.GetObject((string)pathname, (string)className);
         }
 #endif
+
         public static object GetRef(object procName)
         {
             throw new NotImplementedException("GetRef function is not implemendted.");
@@ -595,29 +610,34 @@ namespace Dlrsoft.VBScript.Runtime
 
         public static object Hex(object number)
         {
+#if !NETSTANDARD
             return Conversion.Hex(number);
+#else
+            if (number == null)
+            {
+                return ZERO;
+            }
+            else if (number is DBNull)
+            {
+                return number;
+            }
+            else
+            {
+                return string.Format("{0:X}", number);
+            }
+#endif
         }
-        //public static object Hex(object number)
-        //{
-        //    if (number == null)
-        //    {
-        //        return ZERO;
-        //    }
-        //    else if (number is DBNull)
-        //    {
-        //        return number;
-        //    }
-        //    else
-        //    {
-        //        return string.Format("{0:X}", number);
-        //    }
-        //}
 
         public object Hour(object time)
         {
+#if !NETSTANDARD
             return DateAndTime.Hour(Convert.ToDateTime(time));
+#else
+            return Convert.ToDateTime(time).Hour;
+#endif
         }
-#if !SILVERLIGHT
+
+#if !NETSTANDARD
         public object InputBox(object prompt)
         {
             return InputBox(prompt, null, null, null, null);
@@ -670,10 +690,8 @@ namespace Dlrsoft.VBScript.Runtime
                 StringComparison.InvariantCultureIgnoreCase) + 1;
         }
 
-        public static object InstrB(object string1, object string2)
-        {
-            return InstrB((object)1, string1, string2, BuiltInConstants.vbBinaryCompare);
-        }
+        public static object InstrB(object string1, object string2) 
+            => InstrB((object)1, string1, string2, BuiltInConstants.vbBinaryCompare);
 
         public static object InstrB(object arg1, object arg2, object arg3)
         {
@@ -706,7 +724,6 @@ namespace Dlrsoft.VBScript.Runtime
                 StringComparison.InvariantCulture :
                 StringComparison.InvariantCultureIgnoreCase) + 1;
         }
-
         public static object InStrRev(object string1, object string2)
         {
             return InStrRev(string1, string2, -1);
@@ -716,25 +733,58 @@ namespace Dlrsoft.VBScript.Runtime
         {
             return InStrRev(string1, string2, start, BuiltInConstants.vbBinaryCompare);
         }
-
         public static object InStrRev(object string1, object string2, object start, object compare)
         {
+#if !NETSTANDARD
             return Strings.InStrRev(Convert.ToString(string1), Convert.ToString(string2), Convert.ToInt32(start), (CompareMethod)compare); 
-        }
+#else
+            if (string1 == DBNull.Value || string1 == null || string2 == DBNull.Value || string2 == null)
+                return null;
+            var startIndex = Convert.ToInt32(start);
+            var instance = Convert.ToString(string1);
+            if (startIndex == -1)
+                startIndex = Convert.ToString(string1).Length;
+            else if (startIndex > instance.Length)
+                return 0;
+            else if (startIndex == 0 || startIndex < -1)
+                throw new ArgumentOutOfRangeException(nameof(start));
+            startIndex -= 1;
+            return instance.LastIndexOf(
+                Convert.ToString(string2),
+                startIndex,
+                compare.Equals(BuiltInConstants.vbBinaryCompare) ?
+                    StringComparison.InvariantCulture :
+                    StringComparison.InvariantCultureIgnoreCase
+            ) + 1;
+#endif
 
+        }
         public static object Int(object number)
         {
+#if !NETSTANDARD
             return Conversion.Int(number);
+#else
+            return Convert.ToInt32(number);
+#endif
         }
+
 
         public static object IsArray(object varname)
         {
+#if !NETSTANDARD
             return Information.IsArray(varname);
+#else
+            return varname.GetType().IsArray;
+#endif
         }
 
         public static object IsDate(object expression)
         {
+#if !NETSTANDARD
             return Information.IsDate(expression);
+#else
+            return expression is DateTime;
+#endif
         }
 
         public static object IsEmpty(object expression)
@@ -749,7 +799,7 @@ namespace Dlrsoft.VBScript.Runtime
 
         public static object IsNumeric(object expression)
         {
-#if !SILVERLIGHT
+#if !NETSTANDARD
             return Information.IsNumeric(expression);
 #else
             return IsNumericInternal(expression);
@@ -760,13 +810,20 @@ namespace Dlrsoft.VBScript.Runtime
         {
             return expression.GetType().IsCOMObject;
         }
-        
+
         public static object Join(object list, object delimiter)
         {
+#if !NETSTANDARD
             if (list is string[])
                 return Strings.Join((string[])list, Convert.ToString(delimiter));
             else
                 return Strings.Join((object[])list, Convert.ToString(delimiter));
+#else
+            if (list is string[] strings)
+                return string.Join(Convert.ToString(delimiter), strings);
+            else
+                return string.Join(Convert.ToString(delimiter), (object[])list);
+#endif
         }
 
         public static object LBound(object arrayname)
@@ -778,7 +835,7 @@ namespace Dlrsoft.VBScript.Runtime
         {
             if (arrayname == null) throw new ArgumentException("arrayname is required");
 
-            if (arrayname == null) throw new ArgumentException("dimension is required");
+            if (dimension == null) throw new ArgumentException("dimension is required");
 
             if (arrayname.GetType().IsArray)
             {
@@ -792,10 +849,17 @@ namespace Dlrsoft.VBScript.Runtime
 
         public static object LCase(object expression)
         {
+#if !NETSTANDARD
             if (expression is char)
                 return Strings.LCase((char)expression);
             else
                 return Strings.LCase(Convert.ToString(expression));
+#else
+            if (expression is char @char)
+                return @char.ToString().ToLower();
+            else
+                return Convert.ToString(expression).ToLower();
+#endif
         }
 
         public static object Left(object str, object length)
@@ -807,7 +871,11 @@ namespace Dlrsoft.VBScript.Runtime
 
         public static object Len(object str)
         {
+#if !NETSTANDARD
             return Strings.Len(Convert.ToString(str));
+#else
+            return Convert.ToString(str).Length;
+#endif
         }
 
         public static object LoadPicture(object picturename)
@@ -820,14 +888,19 @@ namespace Dlrsoft.VBScript.Runtime
             return Math.Log(Convert.ToDouble(number));
         }
 
+
         public static object LTrim(object str)
         {
             if (str == null || str is DBNull) return str;
-
+#if !NETSTANDARD
             return Strings.LTrim(Convert.ToString(str));
+#else
+
+            return Convert.ToString(str).TrimStart();
+#endif
         }
 
-        public static object Mid(object str, object start)
+            public static object Mid(object str, object start)
         {
             if (str == null || str is DBNull) return str;
 
@@ -857,12 +930,20 @@ namespace Dlrsoft.VBScript.Runtime
 
         public static object Minute(object time)
         {
+#if !NETSTANDARD
             return DateAndTime.Minute(Convert.ToDateTime(time));
+#else
+            return Convert.ToDateTime(time).Minute;
+#endif
         }
 
         public static object Month(object date)
         {
+#if !NETSTANDARD
             return DateAndTime.Month(Convert.ToDateTime(date));
+#else
+            return Convert.ToDateTime(date).Month;
+#endif
         }
 
         public static object MonthName(object month)
@@ -872,9 +953,17 @@ namespace Dlrsoft.VBScript.Runtime
 
         public static object MonthName(object month, object abbreviate)
         {
+#if !NETSTANDARD
             return DateAndTime.MonthName(Convert.ToInt32(month), Convert.ToBoolean(abbreviate));
+#else
+            if (Convert.ToBoolean(abbreviate))
+                return DateTimeFormatInfo.GetInstance(null).GetAbbreviatedMonthName(Convert.ToInt32(month));
+            else
+                return DateTimeFormatInfo.GetInstance(null).GetMonthName(Convert.ToInt32(month));
+#endif
         }
-#if !SILVERLIGHT
+
+#if !NETSTANDARD
         public static object MsgBox(object prompt)
         {
             return MsgBox(prompt, BuiltInConstants.vbOKOnly);
@@ -933,15 +1022,79 @@ namespace Dlrsoft.VBScript.Runtime
 
         public static object Replace(object expression, object find, object replacement, object start, object count, object compare)
         {
+#if !NETSTANDARD
             return Strings.Replace(Convert.ToString(expression), Convert.ToString(find), Convert.ToString(replacement), Convert.ToInt32(start), Convert.ToInt32(count), (CompareMethod)compare);
+#else
+            var expressionS = Convert.ToString(expression);
+            var findS = Convert.ToString(find);
+            var replacementS = Convert.ToString(replacement);
+            var startI = Convert.ToInt32(start);
+            var countI = Convert.ToInt32(count);
+            if (countI < -1)
+                throw new ArgumentException("Argument must be grater than or equal to -1", nameof(expression));
+            if (startI <= 0)
+                throw new ArgumentException("Must be greater than zero.", nameof(start));
+            if (expressionS == null || startI > expressionS.Length)
+                return null;
+            if (startI != 1)
+                expressionS = expressionS.Substring(startI - 1);
+            if (findS == null || findS.Length == 0 || countI == 0)
+                return expressionS;
+            if (countI == -1)
+                countI = expressionS.Length;
+            var expressionLength = expressionS.Length;
+            var findLength = findS.Length;
+            int findLocation;
+            int replacements = 0;
+            CompareInfo compareInfo;
+            CompareOptions compareOptions;
+            var builder = new StringBuilder(expressionLength);
+            if (Convert.ToInt32(compare) == BuiltInConstants.vbTextCompare)
+            {
+                compareInfo = CultureInfo.CurrentCulture.CompareInfo;
+                compareOptions = CompareOptions.IgnoreCase | CompareOptions.IgnoreWidth | CompareOptions.IgnoreKanaType;
+            }
+            else
+            {
+                compareInfo = CultureInfo.InvariantCulture.CompareInfo;
+                compareOptions = CompareOptions.Ordinal;
+            }
+
+            while(startI < expressionLength)
+            {
+                if (replacements == countI)
+                {
+                    builder.Append(expressionS.Substring(startI));
+                    break;
+                }
+                findLocation = compareInfo.IndexOf(expressionS, findS, startI, compareOptions);
+                if (findLocation < 0)
+                {
+                    builder.Append(expressionS.Substring(startI));
+                    break;
+                }
+                else
+                {
+                    builder.Append(expressionS.Substring(startI, findLocation - startI));
+                    builder.Append(replacementS);
+                    replacements += 1;
+                    startI = findLocation + findLength;
+                }
+            }
+
+            return builder.ToString();
+            
+#endif
         }
 
         public static object RGB(object red, object green, object blue)
         {
-#if !SILVERLIGHT
+#if !NETSTANDARD
             return Information.RGB(Convert.ToInt32(red), Convert.ToInt32(green), Convert.ToInt32(blue));
 #else
-            return System.Windows.Media.Color.FromArgb(255, Convert.ToByte(red), Convert.ToByte(green), Convert.ToByte(blue));
+            return Math.Min(Convert.ToInt32(red), 255) 
+                + (Math.Min(Convert.ToInt32(green), 255) * 256) 
+                + (Math.Min(Convert.ToInt32(blue), 255) * 65536);
 #endif
         }
 
@@ -960,6 +1113,7 @@ namespace Dlrsoft.VBScript.Runtime
                 return ((string)str).Substring(strLength - retLength, retLength);
         }
 
+#if !NETSTANDARD
         public static object Rnd()
         {
             return VBMath.Rnd();
@@ -969,16 +1123,19 @@ namespace Dlrsoft.VBScript.Runtime
         {
             return VBMath.Rnd((float)number);
         }
+#endif
 
         public static object Round(object expression, object numdecimalplaces)
         {
             return Math.Round(Convert.ToDouble(expression));
         }
 
+#if !NETSTANDARD
         public static object RTrim(object str)
         {
             return Strings.RTrim((string)str);
         }
+#endif
 
         public static object ScriptEngine()
         {
@@ -1000,14 +1157,20 @@ namespace Dlrsoft.VBScript.Runtime
             return System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.Minor;
         }
 
+
         public static object Second(object time)
         {
+#if !NETSTANDARD
             return DateAndTime.Second(Convert.ToDateTime(time));
+#else
+            return Convert.ToDateTime(time).Second;
+#endif
         }
+
 
         public static object SetLocale(object lcid)
         {
-#if !SILVERLIGHT
+#if !NETSTANDARD
             int prevLcid = (int)GetLocale();
             System.Threading.Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo((int)lcid);
             return prevLcid;
@@ -1030,9 +1193,15 @@ namespace Dlrsoft.VBScript.Runtime
 
         public static object Space(object number)
         {
+#if !NETSTANDARD
             return Strings.Space(Convert.ToInt32(number));
+#else
+            int count = Convert.ToInt32(number);
+            if(count >= 0)
+                return new String(Chr(32), count);
+            throw new ArgumentException("Must be greater than zero.", nameof(number));
+#endif
         }
-
         public static object Split(object expression)
         {
             return Split(expression, " ");
@@ -1050,7 +1219,12 @@ namespace Dlrsoft.VBScript.Runtime
         
         public static object Split(object expression, object delimiter, object count, object compare)
         {
+#if !NETSTANDARD
             return Strings.Split(Convert.ToString(expression), Convert.ToString(delimiter), Convert.ToInt32(count), (CompareMethod)compare);
+#else
+            return Convert.ToString(expression).Split(new[] { Convert.ToChar(delimiter) }, Convert.ToInt32(count));
+#endif
+
         }
 
 
@@ -1059,6 +1233,7 @@ namespace Dlrsoft.VBScript.Runtime
             return Math.Sqrt(Convert.ToDouble(number));
         }
 
+#if !NETSTANDARD
         public static object StrComp(object string1, object string2)
         {
             return StrComp(string1, string2, BuiltInConstants.vbBinaryCompare);
@@ -1083,12 +1258,14 @@ namespace Dlrsoft.VBScript.Runtime
         {
             return Strings.StrReverse(Convert.ToString(string1));
         }
+#endif
 
         public static object Tan(object number)
         {
             return Math.Tan(Convert.ToDouble(number));
         }
 
+#if !NETSTANDARD
         public static object Time()
         {
             return DateAndTime.TimeOfDay;
@@ -1108,15 +1285,20 @@ namespace Dlrsoft.VBScript.Runtime
         {
             return DateAndTime.TimeValue(Convert.ToString(time));
         }
+#endif
 
         public static object Trim(object str)
         {
+#if !NETSTANDARD
             return Strings.Trim(Convert.ToString(str));
+#else
+            return Convert.ToString(str).Trim();
+#endif
         }
 
         public static object TypeName(object varname)
         {
-#if !SILVERLIGHT
+#if !NETSTANDARD
             return Information.TypeName(varname);
 #else
             if (varname == null) return null;
@@ -1133,7 +1315,7 @@ namespace Dlrsoft.VBScript.Runtime
         {
             if (arrayname == null) throw new ArgumentException("arrayname is required");
 
-            if (arrayname == null) throw new ArgumentException("dimension is required");
+            if (dimension == null) throw new ArgumentException("dimension is required");
 
             if (arrayname.GetType().IsArray)
             {
@@ -1147,10 +1329,19 @@ namespace Dlrsoft.VBScript.Runtime
 
         public static object UCase(object expression)
         {
-            if (expression is char)
+            if (expression is char) {
+#if !NETSTANDARD
                 return Strings.UCase((char)expression);
-            else
+#else
+                return ((char)expression).ToString().ToUpper();
+#endif
+            } else {
+#if !NETSTANDARD
                 return Strings.UCase(Convert.ToString(expression));
+#else
+                return Convert.ToString(expression).ToUpper();
+#endif
+            }
         }
 
         public static object Unescape(object charString)
@@ -1226,6 +1417,7 @@ namespace Dlrsoft.VBScript.Runtime
             //todo: vbDataObject not implemented
         }
 
+#if !NETSTANDARD
         public static object Weekday(object date)
         {
             return DateAndTime.Weekday(Convert.ToDateTime(date), (FirstDayOfWeek)BuiltInConstants.vbSunday);
@@ -1250,10 +1442,15 @@ namespace Dlrsoft.VBScript.Runtime
         {
             return DateAndTime.WeekdayName(Convert.ToInt32(weekday), Convert.ToBoolean(abbreviate), (FirstDayOfWeek)firstdayofweek);
         }
+#endif
 
         public static object Year(object date)
         {
+#if !NETSTANDARD
             return DateAndTime.Year(Convert.ToDateTime(date));
+#else
+            return Convert.ToDateTime(date).Year;
+#endif
         }
 
         private static bool IsNumericInternal(object number)

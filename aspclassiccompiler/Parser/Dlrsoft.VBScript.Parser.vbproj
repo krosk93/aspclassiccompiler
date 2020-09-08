@@ -1,0 +1,11 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net45;netstandard2.0</TargetFrameworks>
+    <Copyright>Copyright (C) Microsoft Corporation 2005 and DLRSoft 2009</Copyright>
+    <Description>VBScript.NET Parser</Description>
+    <Product>VBScript.NET Parser</Product>
+    <Company>DLRSoft</Company>
+    <Authors>DLRSoft</Authors>
+    <AssemblyVersion>0.7.0.0</AssemblyVersion>
+  </PropertyGroup>
+</Project>

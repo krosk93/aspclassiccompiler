@@ -8,7 +8,9 @@ using Microsoft.Scripting.Ast;
 using Microsoft.Scripting.ComInterop;
 #else
 using System.Linq.Expressions;
+#if !NETSTANDARD
 using Microsoft.Scripting.ComInterop;
+#endif
 #endif
 using Dlrsoft.VBScript.Runtime;
 
@@ -27,7 +29,7 @@ namespace Dlrsoft.VBScript.Binders
         public override DynamicMetaObject FallbackGetMember(
                 DynamicMetaObject targetMO, DynamicMetaObject errorSuggestion)
         {
-#if !SILVERLIGHT
+#if !NETSTANDARD
             // First try COM binding.
             DynamicMetaObject result;
             if (ComBinder.TryBindGetMember(this, targetMO, out result))

@@ -9,6 +9,8 @@
 '
 
 Imports System.Globalization
+Imports System.IO
+Imports System.Text
 
 ''' <summary>
 ''' A lexical analyzer for Visual Basic .NET. It produces a stream of lexical tokens.
@@ -59,11 +61,11 @@ Public NotInheritable Class Scanner
         End Get
 
         Set(ByVal value As Integer)
-            If Value < 1 Then
+            If value < 1 Then
                 Throw New ArgumentException("Tabs cannot represent less than one space.")
             End If
 
-            _TabSpaces = Value
+            _TabSpaces = value
         End Set
     End Property
 
@@ -396,7 +398,7 @@ Public NotInheritable Class Scanner
         If TypeCharacterTable Is Nothing Then
             Dim Table As Dictionary(Of String, TypeCharacter) = New Dictionary(Of String, TypeCharacter)(StringComparer.InvariantCultureIgnoreCase)
             ' NOTE: These have to be in the same order as the enum!
-            Dim TypeCharacters() As String = {"$", "%", "&", "S", "I", "L", "!", "#", "@", "F", "R", "D", "US", "UI", "UL"}
+            Dim TypeCharacters As String() = {"$", "%", "&", "S", "I", "L", "!", "#", "@", "F", "R", "D", "US", "UI", "UL"}
             Dim TypeCharacter As TypeCharacter = TypeCharacter.StringSymbol
 
             For Index As Integer = 0 To TypeCharacters.Length - 1
@@ -537,10 +539,8 @@ Public NotInheritable Class Scanner
                         Case TypeCharacter.UnsignedShortChar
                             Dim Value As ULong = CULng(Literal.ToString())
 
-                            If Value <= &HFFFFL Then
-                                If Value >= UShort.MinValue AndAlso Value <= UShort.MaxValue Then
-                                    Return New UnsignedIntegerLiteralToken(CUShort(Value), Base, TypeCharacter, SpanFrom(Start))
-                                End If
+                            If Value <= &HFFFFL AndAlso Value >= UShort.MinValue AndAlso Value <= UShort.MaxValue Then
+                                Return New UnsignedIntegerLiteralToken(CUShort(Value), Base, TypeCharacter, SpanFrom(Start))
                             End If
                             ' Fall through
 
@@ -561,10 +561,8 @@ Public NotInheritable Class Scanner
                         Case TypeCharacter.UnsignedIntegerChar
                             Dim Value As ULong = CULng(Literal.ToString())
 
-                            If Value <= &HFFFFFFFFL Then
-                                If Value >= UInteger.MinValue AndAlso Value <= UInteger.MaxValue Then
-                                    Return New UnsignedIntegerLiteralToken(CUInt(Value), Base, TypeCharacter, SpanFrom(Start))
-                                End If
+                            If Value <= &HFFFFFFFFL AndAlso Value >= UInteger.MinValue AndAlso Value <= UInteger.MaxValue Then
+                                Return New UnsignedIntegerLiteralToken(CUInt(Value), Base, TypeCharacter, SpanFrom(Start))
                             End If
                             ' Fall through
 
@@ -602,7 +600,7 @@ Public NotInheritable Class Scanner
             If IsPeriod(PeekChar()) Then
                 Literal.Append(MakeHalfWidth(ReadChar()))
 
-                If Not IsDigit(PeekChar()) And Literal.Length = 1 Then
+                If Not IsDigit(PeekChar()) AndAlso Literal.Length = 1 Then
                     Return New PunctuatorToken(TokenType.Period, SpanFrom(Start))
                 End If
 
@@ -1100,11 +1098,9 @@ ContinueScan:
         If PeekChar() = ChrW(&HFFFF) Then
             Token = New EndOfStreamToken(SpanFrom(Start))
         Else
-            If ReadChar() = ChrW(&HD) Then
-                ' A CR/LF pair is a legal line terminator
-                If PeekChar() = ChrW(&HA) Then
-                    ReadChar()
-                End If
+            ' A CR/LF pair is a legal line terminator
+            If ReadChar() = ChrW(&HD) AndAlso PeekChar() = ChrW(&HA) Then
+                ReadChar()
             End If
 
             If produceToken Then
@@ -1319,7 +1315,7 @@ ContinueLine:
 
         If _Disposed Then Throw New ObjectDisposedException("Scanner")
 
-        While Peek().Type <> TokenType.EndOfStream And Peek().Type <> TokenType.LineTerminator
+        While Peek().Type <> TokenType.EndOfStream AndAlso Peek().Type <> TokenType.LineTerminator
             TokenArray.Add(Read())
         End While
 

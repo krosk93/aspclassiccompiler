@@ -286,6 +286,10 @@ namespace Dlrsoft.VBScript.Runtime
                         {
                             return ((string)left).Equals(right);
                         }
+                        else if (targetType == typeof(DateTime))
+                        {
+                            return Convert.ToDateTime(left) == Convert.ToDateTime(right);
+                        }
                         else
                         {
                             return left == right;
@@ -321,6 +325,10 @@ namespace Dlrsoft.VBScript.Runtime
                         else if (targetType == typeof(string))
                         {
                             return !((string)left).Equals(right);
+                        }
+                        else if (targetType == typeof(DateTime))
+                        {
+                            return Convert.ToDateTime(left) != Convert.ToDateTime(right);
                         }
                         else
                         {
@@ -358,6 +366,10 @@ namespace Dlrsoft.VBScript.Runtime
                         int result = ((string)left).CompareTo(right);
                         return (result > 0);
                     }
+                    else if (targetType == typeof(DateTime))
+                    {
+                        return Convert.ToDateTime(left) > Convert.ToDateTime(right);
+                    }
                     break;
                 case ExpressionType.GreaterThanOrEqual:
                     if (targetType == typeof(int))
@@ -384,6 +396,10 @@ namespace Dlrsoft.VBScript.Runtime
                     {
                         int result = ((string)left).CompareTo(right);
                         return (result >= 0);
+                    }
+                    else if (targetType == typeof(DateTime))
+                    {
+                        return Convert.ToDateTime(left) >= Convert.ToDateTime(right);
                     }
                     break;
                 case ExpressionType.LessThan:
@@ -412,6 +428,10 @@ namespace Dlrsoft.VBScript.Runtime
                         int result = ((string)left).CompareTo(right);
                         return (result < 0);
                     }
+                    else if (targetType == typeof(DateTime))
+                    {
+                        return Convert.ToDateTime(left) < Convert.ToDateTime(right);
+                    }
                     break;
                 case ExpressionType.LessThanOrEqual:
                     if (targetType == typeof(int))
@@ -438,6 +458,10 @@ namespace Dlrsoft.VBScript.Runtime
                     {
                         int result = ((string)left).CompareTo(right);
                         return (result <= 0);
+                    }
+                    else if (targetType == typeof(DateTime))
+                    {
+                        return Convert.ToDateTime(left) <= Convert.ToDateTime(right);
                     }
                     break;
                 case ExpressionType.And:

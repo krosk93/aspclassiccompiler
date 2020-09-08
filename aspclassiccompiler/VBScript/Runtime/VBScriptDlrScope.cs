@@ -29,13 +29,15 @@ namespace Dlrsoft.VBScript.Runtime
 
         public override bool TryGetMember(GetMemberBinder binder, out object result)
         {
-            return _scope.TryGetVariable(SymbolTable.StringToCaseInsensitiveId(binder.Name),
-                                     out result);
+            //return _scope.TryGetVariable(SymbolTable.StringToCaseInsensitiveId(binder.Name),
+            //                         out result);
+            result = null;
+            return false;
         }
 
         public override bool TrySetMember(SetMemberBinder binder, object value)
         {
-            _scope.SetVariable(SymbolTable.StringToId(binder.Name), value);
+            //_scope.SetVariable(SymbolTable.StringToId(binder.Name), value);
             return true;
         }
     }

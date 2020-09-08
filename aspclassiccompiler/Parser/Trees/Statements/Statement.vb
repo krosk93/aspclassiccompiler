@@ -8,6 +8,7 @@
 ' MERCHANTIBILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
 '
 
+Imports System.Collections.ObjectModel
 ''' <summary>
 ''' A parse tree for a statement.
 ''' </summary>

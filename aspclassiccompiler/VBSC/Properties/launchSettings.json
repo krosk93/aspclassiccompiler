@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "VBSC.VS2013": {
+      "commandName": "Project",
+      "commandLineArgs": "..\\..\\..\\test\\hello.vbs"
+    }
+  }
+}

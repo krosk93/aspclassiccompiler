@@ -796,8 +796,8 @@ Public Class TreeXmlSerializer
 
             Case TreeType.DoBlockStatement
                 With CType(Statement, DoBlockStatement)
-                    If Not .Expression Is Nothing Then
-                        Writer.WriteAttributeString("isWhile", Str(.IsWhile))
+                    If .Expression IsNot Nothing Then
+                        Writer.WriteAttributeString("isWhile", .IsWhile.ToString())
                         SerializeStatementComments(Statement)
                         If .IsWhile Then
                             SerializeToken(TokenType.While, .WhileOrUntilLocation)
@@ -814,8 +814,8 @@ Public Class TreeXmlSerializer
 
             Case TreeType.LoopStatement
                 With CType(Statement, LoopStatement)
-                    If Not .Expression Is Nothing Then
-                        Writer.WriteAttributeString("isWhile", Str(.IsWhile))
+                    If .Expression IsNot Nothing Then
+                        Writer.WriteAttributeString("isWhile", .IsWhile.ToString())
                         SerializeStatementComments(Statement)
                         If .IsWhile Then
                             SerializeToken(TokenType.While, .WhileOrUntilLocation)

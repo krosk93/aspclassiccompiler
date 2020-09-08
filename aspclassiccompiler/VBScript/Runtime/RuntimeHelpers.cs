@@ -15,10 +15,6 @@ using Path = System.IO.Path;
 using File = System.IO.File;
 using Directory = System.IO.Directory;
 using Debug = System.Diagnostics.Debug;
-#if SILVERLIGHT
-using w = System.Windows;
-using System.Windows.Resources;
-#endif
 
 namespace Dlrsoft.VBScript.Runtime
 {
@@ -627,15 +623,9 @@ namespace Dlrsoft.VBScript.Runtime
         public static List<MethodInfo> GetExtensionMethods(string name, DynamicMetaObject targetMO, DynamicMetaObject[] args)
         {
             List<MethodInfo> res = new List<MethodInfo>();
-#if !SILVERLIGHT
+
             foreach (Assembly a in AppDomain.CurrentDomain.GetAssemblies())
             {
-#else
-            foreach (w.AssemblyPart ap in w.Deployment.Current.Parts)
-            {
-                StreamResourceInfo sri = w.Application.GetResourceStream(new Uri(ap.Source, UriKind.Relative)); 
-                Assembly a = new w.AssemblyPart().Load(sri.Stream); 
-#endif
                 Type[] types;
                 try
                 {

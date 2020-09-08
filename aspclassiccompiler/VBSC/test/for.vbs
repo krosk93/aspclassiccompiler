@@ -1,6 +1,6 @@
 ﻿	dim i
 	for i = 1 to 8
-		response.write i
+		response.writeline i
 	next
 
-	response.write i
+	response.writeline i

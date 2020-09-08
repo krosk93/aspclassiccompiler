@@ -8,6 +8,7 @@
 ' MERCHANTIBILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
 '
 
+Imports System.Collections.ObjectModel
 ''' <summary>
 ''' A collection of a particular type of trees
 ''' </summary>

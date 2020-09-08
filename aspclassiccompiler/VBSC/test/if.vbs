@@ -1,6 +1,6 @@
 ﻿	dim i, color
 	
-	i = 0
+	i = 3
 	if i = 1 then
 		color = "red"
 	elseif i = 2 then

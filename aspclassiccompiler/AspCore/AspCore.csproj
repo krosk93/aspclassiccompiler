@@ -1,0 +1,34 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="AspHandler.cs" />
+    <Compile Remove="BuiltInObjects\AspCookie.cs" />
+    <Compile Remove="BuiltInObjects\AspCookieCollection.cs" />
+    <Compile Remove="BuiltInObjects\AspForm.cs" />
+    <Compile Remove="BuiltInObjects\AspFormValue.cs" />
+    <Compile Remove="BuiltInObjects\AspNameValueCollection.cs" />
+    <Compile Remove="BuiltInObjects\AspObjectContext.cs" />
+    <Compile Remove="BuiltInObjects\AspReadCookie.cs" />
+    <Compile Remove="BuiltInObjects\AspServer.cs" />
+    <Compile Remove="BuiltInObjects\AspStaticObjectsVariantDictionary.cs" />
+    <Compile Remove="BuiltInObjects\AspStringList.cs" />
+    <Compile Remove="BuiltInObjects\AspVariantDictionary.cs" />
+    <Compile Remove="BuiltInObjects\AspWriteCookie.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.ViewFeatures" Version="2.2.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Razor" Version="2.2.0" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Abstractions" Version="3.1.7" />
+    <PackageReference Include="System.CodeDom" Version="4.7.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\VBScript\VBScript.VS2013.csproj" />
+  </ItemGroup>
+
+</Project>

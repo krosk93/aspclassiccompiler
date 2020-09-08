@@ -1,10 +1,6 @@
-﻿using System;
-using System.IO;
-using System.Dynamic;
-using System.Collections.Generic;
-using System.Text;
-using Microsoft.Scripting;
+﻿using Microsoft.Scripting;
 using Microsoft.Scripting.Utils;
+using System.IO;
 
 namespace Dlrsoft.VBScript.Compiler
 {

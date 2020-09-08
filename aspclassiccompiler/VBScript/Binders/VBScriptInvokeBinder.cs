@@ -5,13 +5,15 @@ using System.Reflection;
 using System.Dynamic;
 #if USE35
 using Microsoft.Scripting.Ast;
-#if !SILVERLIGHT
+#if !NETSTANDARD
 using Microsoft.Scripting.ComInterop;
 #endif
 #else
 using System.Linq;
 using System.Linq.Expressions;
+#if !NETSTANDARD
 using Microsoft.Scripting.ComInterop;
+#endif
 #endif
 using Dlrsoft.VBScript.Runtime;
 
@@ -28,7 +30,7 @@ namespace Dlrsoft.VBScript.Binders
                 DynamicMetaObject targetMO, DynamicMetaObject[] argMOs,
                 DynamicMetaObject errorSuggestion)
         {
-#if !SILVERLIGHT
+#if !NETSTANDARD
             // First try COM binding.
             DynamicMetaObject result;
 
